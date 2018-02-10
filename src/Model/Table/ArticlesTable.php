@@ -5,6 +5,7 @@ use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
+use Cake\Utility\Text;
 
 /**
  * Articles Model
@@ -31,11 +32,11 @@ class ArticlesTable extends Table
      * @param array $config The configuration for the Table.
      * @return void
      */
-    public function initialize(array $config)
+    public function initialize(array $config)//インスタンス生成時にコンストラクタから呼び出されるメソッド
     {
         parent::initialize($config);
 
-        $this->setTable('articles');
+//        $this->setTable('articles');
         $this->setDisplayField('title');
         $this->setPrimaryKey('id');
 
@@ -59,35 +60,35 @@ class ArticlesTable extends Table
      * @param \Cake\Validation\Validator $validator Validator instance.
      * @return \Cake\Validation\Validator
      */
-    public function validationDefault(Validator $validator)
-    {
-        $validator
-            ->integer('id')
-            ->allowEmpty('id', 'create');
-
-        $validator
-            ->scalar('title')
-            ->maxLength('title', 255)
-            ->requirePresence('title', 'create')
-            ->notEmpty('title');
-
-        $validator
-            ->scalar('slug')
-            ->maxLength('slug', 191)
-            ->requirePresence('slug', 'create')
-            ->notEmpty('slug')
-            ->add('slug', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
-
-        $validator
-            ->scalar('body')
-            ->allowEmpty('body');
-
-        $validator
-            ->boolean('published')
-            ->allowEmpty('published');
-
-        return $validator;
-    }
+//    public function validationDefault(Validator $validator)
+//    {
+//        $validator
+//            ->integer('id')
+//            ->allowEmpty('id', 'create');
+//
+//        $validator
+//            ->scalar('title')
+//            ->maxLength('title', 255)
+//            ->requirePresence('title', 'create')
+//            ->notEmpty('title');
+//
+//        $validator
+//            ->scalar('slug')
+//            ->maxLength('slug', 191)
+//            ->requirePresence('slug', 'create')
+//            ->notEmpty('slug')
+//            ->add('slug', 'unique', ['rule' => 'validateUnique', 'provider' => 'table']);
+//
+//        $validator
+//            ->scalar('body')
+//            ->allowEmpty('body');
+//
+//        $validator
+//            ->boolean('published')
+//            ->allowEmpty('published');
+//
+//        return $validator;
+//    }
 
     /**
      * Returns a rules checker object that will be used for validating
@@ -102,5 +103,14 @@ class ArticlesTable extends Table
         $rules->add($rules->existsIn(['user_id'], 'Users'));
 
         return $rules;
+    }
+
+    public function beforeSave($event, $entity, $options)
+    {
+        if ($entity->isNew() && !$entity->slug) {
+            $sluggedTitle = Text::slug($entity->title);
+            // スラグをスキーマで定義されている最大長に調整
+            $entity->slug = substr($sluggedTitle, 0, 191);
+        }
     }
 }

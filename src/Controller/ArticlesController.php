@@ -18,7 +18,7 @@ class ArticlesController extends AppController
      *
      * @return \Cake\Http\Response|void
      */
-    public function select()
+    public function index()
     {
         $this->paginate = [
             'contain' => ['Users']
@@ -33,15 +33,17 @@ class ArticlesController extends AppController
     /**
      * View method
      *
-     * @param string|null $id Article id.
+     * @param string|null $slug Article $slug.
      * @return \Cake\Http\Response|void
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view($id = null)
+    public function view($slug = null)
     {
-        $article = $this->Articles->get($id, [
-            'contain' => ['Users', 'Tags']
-        ]);
+//        $article = $this->Articles->get($id, [
+//            'contain' => ['Users', 'Tags']
+//        ]);
+        //findBySlug = 動的ファインダー
+        $article = $this->Articles->findBySlug($slug)->firstOrFail();
 
         $this->set('article', $article);
     }
@@ -51,21 +53,32 @@ class ArticlesController extends AppController
      *
      * @return \Cake\Http\Response|null Redirects on successful add, renders view otherwise.
      */
-    public function add()
+    public function add() // post と post以外両方に対応している(多分分けるべき->単一責任原則に反する)
     {
         $article = $this->Articles->newEntity();
+
+        //postだった場合の処理
         if ($this->request->is('post')) {
+
+            //リクエストデータをArticleEntityに変換(レコードを表す)
             $article = $this->Articles->patchEntity($article, $this->request->getData());
+
+            //ArticleEntityをArticlesTableのsaveメソッドで永続化(insert or update ※isNewで判断
+
             if ($this->Articles->save($article)) {
+                //Flach = セッションにメッセージを書き込む
                 $this->Flash->success(__('The article has been saved.'));
 
                 return $this->redirect(['action' => 'index']);
             }
+
             $this->Flash->error(__('The article could not be saved. Please, try again.'));
         }
-        $users = $this->Articles->Users->find('list', ['limit' => 200]);
-        $tags = $this->Articles->Tags->find('list', ['limit' => 200]);
-        $this->set(compact('article', 'users', 'tags'));
+        //postでなかった場合の処理
+//        $users = $this->Articles->Users->find('list', ['limit' => 200]);
+//        $tags = $this->Articles->Tags->find('list', ['limit' => 200]);
+//        $this->set(compact('article', 'users', 'tags'));
+        $this->set('article', $article);
     }
 
     /**
