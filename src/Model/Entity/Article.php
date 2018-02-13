@@ -2,6 +2,7 @@
 namespace App\Model\Entity;
 
 use Cake\ORM\Entity;
+use Cake\Collection\Collection;
 
 /**
  * Article Entity
@@ -39,6 +40,29 @@ class Article extends Entity
         'created' => true,
         'modified' => true,
         'user' => true,
-        'tags' => true
+        'tags' => true,
+        'tag_string' => true,
     ];
+
+    // ctpの$this->Form->controlから呼び出される
+    protected function _getTagString()// tag_string => _getTagString()を呼び出す
+    {
+        //既にtag_stringが存在する場合
+        if(isset($this->_properties['tag_string'])){
+            return $this->_properties['tag_string'];
+        }
+        //記事にtagが設定されて無い場合
+        if(empty($this->tags)){
+            return '';
+        }
+
+        $tags = new Collection($this->tags);
+        $str = $tags->reduce(function($string, $tag){
+            return $string.$tag->title.', ';
+        },'');
+
+//        $this->_properties['tag_string'] = $str;
+        return trim($str,', ');
+
+    }
 }

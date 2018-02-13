@@ -41,8 +41,8 @@ class TagsFixture extends TestFixture
         [
             'id' => 1,
             'title' => 'Lorem ipsum dolor sit amet',
-            'created' => '2018-02-05 16:14:04',
-            'modified' => '2018-02-05 16:14:04'
+            'created' => '2018-02-12 06:47:50',
+            'modified' => '2018-02-12 06:47:50'
         ],
     ];
 }
